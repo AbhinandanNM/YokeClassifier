@@ -1,0 +1,110 @@
+paths:
+  dataset_root: C:/Users/Abhinandan/OneDrive/Desktop/Minor
+  perfect_dir: C:/Users/Abhinandan/OneDrive/Desktop/Minor/perfect
+  defect_dir: C:/Users/Abhinandan/OneDrive/Desktop/Minor/defect
+  aligned_dir: C:/Users/Abhinandan/OneDrive/Desktop/Minor/inspection_system/aligned
+  roi_dataset_dir: C:/Users/Abhinandan/OneDrive/Desktop/Minor/inspection_system/roi_dataset
+  models_dir: C:/Users/Abhinandan/OneDrive/Desktop/Minor/inspection_system/models
+  outputs_dir: C:/Users/Abhinandan/OneDrive/Desktop/Minor/inspection_system/outputs
+  reference_image: C:/Users/Abhinandan/OneDrive/Desktop/Minor/perfect/perfect_full_0000.jpg
+alignment:
+  method: orb_homography
+  orb_features: 5000
+  match_ratio: 0.75
+  min_good_matches: 10
+  output_size:
+  - 1080
+  - 1080
+roi:
+  spline:
+  - 376
+  - 373
+  - 432
+  - 302
+  top_nib:
+  - 444
+  - 95
+  - 252
+  - 249
+  bottom_nib:
+  - 429
+  - 702
+  - 292
+  - 270
+  hole_tl:
+  - 71
+  - 63
+  - 314
+  - 261
+  hole_tr:
+  - 742
+  - 64
+  - 303
+  - 265
+  hole_bl:
+  - 60
+  - 720
+  - 322
+  - 259
+  hole_br:
+  - 754
+  - 714
+  - 299
+  - 268
+  crop_size: 128
+synthetic:
+  inpaint_radius: 12
+  inpaint_method: telea
+  mask_dilate_px: 8
+  augment_factor: 1
+training:
+  backbone: mobilenet_v2
+  pretrained: true
+  num_classes: 2
+  image_size: 128
+  batch_size: 32
+  epochs: 15
+  learning_rate: 0.0001
+  weight_decay: 1.0e-05
+  val_split: 0.15
+  test_split: 0.1
+  early_stop_patience: 8
+  scheduler: cosine
+  device: auto
+  num_workers: 0
+  seed: 42
+  features:
+  - spline
+  - top_nib
+  - bottom_nib
+  - hole
+inference:
+  present_threshold: 0.6
+  max_reproj_error: 8.0
+visualisation:
+  font_scale: 0.7
+  thickness: 2
+  present_color:
+  - 0
+  - 200
+  - 0
+  absent_color:
+  - 0
+  - 0
+  - 220
+  pass_banner_color:
+  - 0
+  - 180
+  - 0
+  fail_banner_color:
+  - 0
+  - 0
+  - 200
+  panel_width: 400
+camera:
+  type: ip_camera
+  url: http://10.80.82.71:8080/video
+  index: 0
+  width: 1920
+  height: 1080
+  fps: 30

@@ -1,0 +1,57 @@
+========================================================================
+  INDUSTRIAL VISUAL INSPECTION - DATASET ANALYSIS REPORT
+========================================================================
+  Generated : 2026-06-01 23:24:09
+
+SUMMARY
+----------------------------------------
+  Perfect images  : 200
+  Defect  images  : 200
+
+RESOLUTION
+----------------------------------------
+  Perfect resolutions : {(1920, 1080)}
+  Defect  resolutions : {(1920, 1080)}
+
+STATISTICS  (mean +/- std)  [min - max]
+------------------------------------------------------------------------
+Metric                         Perfect                           Defect                          
+------------------------------------------------------------------------
+Gray Mean                      107.589 +/- 13.687  [84.058 - 132.057]  106.638 +/- 16.772  [74.714 - 140.620]
+Gray Std Dev                    56.608 +/- 9.283  [37.332 - 76.006]   53.439 +/- 10.336  [31.924 - 78.601]
+Blue Channel Mean              103.083 +/- 13.222  [80.445 - 125.903]   95.655 +/- 15.478  [67.756 - 128.492]
+Green Channel Mean             107.665 +/- 13.680  [84.082 - 132.089]  104.770 +/- 16.587  [73.573 - 138.702]
+Red Channel Mean               109.064 +/- 13.889  [85.251 - 134.276]  114.457 +/- 17.680  [79.515 - 148.946]
+Otsu Threshold                 116.745 +/- 15.128  [91.000 - 143.000]  114.685 +/- 18.532  [79.000 - 151.000]
+Part Occupancy (ratio)           0.403 +/- 0.008  [0.387 - 0.426]    0.412 +/- 0.008  [0.394 - 0.429]
+Edge Density                     0.042 +/- 0.010  [0.020 - 0.064]    0.024 +/- 0.008  [0.008 - 0.049]
+Laplacian Variance              81.376 +/- 34.078  [25.903 - 228.519]   56.544 +/- 34.325  [12.040 - 219.987]
+Histogram Entropy                7.626 +/- 0.181  [7.109 - 7.868]    7.430 +/- 0.235  [6.794 - 7.824]
+
+KEY DIFFERENCES
+----------------------------------------
+  Edge density delta (P - D) : +0.0177  (Perfect has MORE edges (features present))
+  Gray mean   delta (P - D)  : +0.95
+
+ORIENTATION VARIANCE
+----------------------------------------
+  Perfect : mean=28.9 deg  std=29.6 deg  range=[-45.0, 88.8]  (n=50)
+  Defect  : mean=-20.4 deg  std=60.9 deg  range=[-89.0, 89.0]  (n=49)
+
+ALIGNMENT REQUIREMENT
+----------------------------------------
+  [!] High orientation variance detected (std > 5 deg)
+      ORB+homography alignment is REQUIRED before ROI extraction.
+
+AUGMENTATION RECOMMENDATIONS
+----------------------------------------
+  1. RandomBrightnessContrast - handles lighting variability
+  2. GaussNoise               - adds sensor noise robustness
+  3. MotionBlur               - handles camera shake
+  4. Rotate(limit=35 deg)     - handles orientation tilt
+  5. HorizontalFlip           - valid symmetry for corner holes
+  6. CLAHE                    - normalises local contrast
+
+========================================================================
+  END OF REPORT
+========================================================================
