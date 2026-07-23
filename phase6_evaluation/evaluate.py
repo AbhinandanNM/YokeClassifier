@@ -116,7 +116,7 @@ def evaluate_model(feature_group: str, cfg: dict):
     all_preds = np.array(all_preds)
     
     # Metrics
-    report = classification_report(all_labels, all_preds, target_names=["Absent", "Present"], zero_division=0)
+    report = classification_report(all_labels, all_preds, labels=[0, 1], target_names=["Absent", "Present"], zero_division=0)
     print("\nClassification Report:\n")
     print(report)
     

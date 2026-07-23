@@ -15,6 +15,12 @@ import torch
 from torch.utils.data import Dataset
 import numpy as np
 
+import sys
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+from utils.image_io import iter_images
+
 class ROIDataset(Dataset):
     def __init__(self, data_dir: str, feature_group: str, transform=None):
         """
@@ -28,12 +34,12 @@ class ROIDataset(Dataset):
         
         present_dir = self.data_dir / "present"
         if present_dir.exists():
-            for fp in present_dir.glob("*.jpg"):
+            for fp in iter_images(present_dir):
                 self.samples.append((fp, 1))
-                
+
         absent_dir = self.data_dir / "absent"
         if absent_dir.exists():
-            for fp in absent_dir.glob("*.jpg"):
+            for fp in iter_images(absent_dir):
                 self.samples.append((fp, 0))
                 
         if not self.samples:

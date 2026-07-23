@@ -78,24 +78,24 @@ def main():
     clean_old_data()
     
     # Phase 2: Batch Alignment
-    # ok = run_phase(
-    #     "PHASE 2 - BATCH ALIGNMENT",
-    #     ["phase2_alignment/test_alignment.py", "--mode", "batch"],
-    #     timeout=600,
-    # )
+    ok = run_phase(
+        "PHASE 2 - BATCH ALIGNMENT",
+        ["phase2_alignment/test_alignment.py", "--mode", "batch"],
+        timeout=None,
+    )
     
     # Phase 3: ROI Visualization (verify)
-    # run_phase(
-    #     "PHASE 3 - ROI VISUALIZATION",
-    #     ["phase3_roi/visualize_rois.py"],
-    #     timeout=60,
-    # )
+    run_phase(
+        "PHASE 3 - ROI VISUALIZATION",
+        ["phase3_roi/visualize_rois.py"],
+        timeout=60,
+    )
     
     # Phase 4: Dataset Generation
     ok = run_phase(
         "PHASE 4 - ROI DATASET GENERATION",
         ["phase4_synthetic/build_dataset.py"],
-        timeout=600,
+        timeout=None,
     )
     
     if not ok:
@@ -106,7 +106,7 @@ def main():
     ok = run_phase(
         "PHASE 5 - MODEL TRAINING (15 epochs)",
         ["phase5_training/train.py"],
-        timeout=3600,
+        timeout=None,
     )
     
     if not ok:

@@ -66,17 +66,17 @@ class Aligner:
         self.out_w        = int(out_w)
         self.out_h        = int(out_h)
 
-        # Build the ORB detector + BF matcher once
-        self.orb     = cv2.ORB_create(nfeatures=self.n_features)
-        self.matcher = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=False)
+        # Build the SIFT detector + BF matcher once (SIFT is much more robust for rotation/defects)
+        self.sift    = cv2.SIFT_create(nfeatures=self.n_features)
+        self.matcher = cv2.BFMatcher(cv2.NORM_L2, crossCheck=False)
 
         # Load reference image
         ref_path = config["paths"]["reference_image"]
         ref_bgr  = cv2.imread(ref_path)
         if ref_bgr is None:
             raise FileNotFoundError(f"Reference image not found: {ref_path}")
-        self.ref_bgr  = ref_bgr
-        self.ref_kp, self.ref_desc = self._detect(ref_bgr)
+        self.ref_bgr  = self._downscale(ref_bgr)
+        self.ref_kp, self.ref_desc = self._detect(self.ref_bgr)
 
         # Pre-compute reference corners for reprojection error
         h_ref, w_ref = ref_bgr.shape[:2]
@@ -86,12 +86,20 @@ class Aligner:
 
         print(f"[Aligner] reference image  : {ref_path}")
         print(f"[Aligner] output size      : {self.out_w}×{self.out_h}")
-        print(f"[Aligner] ORB features     : {self.n_features}")
+        print(f"[Aligner] SIFT features    : {self.n_features}")
         print(f"[Aligner] ref keypoints    : {len(self.ref_kp)}")
 
     # ------------------------------------------------------------------ #
     # Public API
     # ------------------------------------------------------------------ #
+
+    def _downscale(self, img: np.ndarray, max_dim: int = 2400) -> np.ndarray:
+        """Downscale images to max_dim to ensure fast feature matching."""
+        h, w = img.shape[:2]
+        if max(h, w) > max_dim:
+            scale = max_dim / float(max(h, w))
+            return cv2.resize(img, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
+        return img
 
     def align(self, bgr: np.ndarray) -> tuple[np.ndarray, dict]:
         """
@@ -104,13 +112,20 @@ class Aligner:
         quality : dict
             Alignment quality metrics.
         """
-        # Try ORB + homography first
-        aligned, quality = self._align_orb(bgr)
+        # Downscale input to match reference scale and speed up SIFT
+        bgr = self._downscale(bgr)
+
+        # Check if user explicitly wants only contour alignment (much faster)
+        if self.cfg.get("alignment", {}).get("method") == "contour":
+            return self._align_contour(bgr)
+
+        # Try SIFT + homography first
+        aligned, quality = self._align_sift(bgr)
         if quality["success"]:
             return aligned, quality
 
         # Fallback to contour alignment
-        print("[Aligner] ORB failed — falling back to contour alignment")
+        # print("[Aligner] SIFT failed — falling back to contour alignment")
         aligned, quality = self._align_contour(bgr)
         return aligned, quality
 
@@ -122,7 +137,7 @@ class Aligner:
         return self.align(bgr)
 
     # ------------------------------------------------------------------ #
-    # ORB alignment
+    # SIFT alignment
     # ------------------------------------------------------------------ #
 
     def _detect(self, bgr: np.ndarray):
@@ -130,11 +145,11 @@ class Aligner:
         # CLAHE to normalise local contrast before detection
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
         gray  = clahe.apply(gray)
-        kp, desc = self.orb.detectAndCompute(gray, None)
+        kp, desc = self.sift.detectAndCompute(gray, None)
         return kp, desc
 
-    def _align_orb(self, bgr: np.ndarray) -> tuple[np.ndarray, dict]:
-        quality = {"method": "orb", "n_matches": 0, "reproj_err": 9999.0, "success": False}
+    def _align_sift(self, bgr: np.ndarray) -> tuple[np.ndarray, dict]:
+        quality = {"method": "sift", "n_matches": 0, "reproj_err": 9999.0, "success": False}
 
         kp, desc = self._detect(bgr)
         if desc is None or len(desc) < self.min_matches:
@@ -200,19 +215,16 @@ class Aligner:
     def _align_contour(self, bgr: np.ndarray) -> tuple[np.ndarray, dict]:
         """
         Find the largest connected component (the metal part) in both the
-        reference and the input image. Use their bounding-box centres to
-        compute a similarity transform (translation + scale).
+        reference and the input image. Use their minAreaRect to
+        compute a similarity transform (translation + scale + rotation).
         """
         quality = {"method": "contour", "success": False}
 
-        def part_bbox(img_bgr):
+        def part_contour(img_bgr):
             gray  = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-            # Bilateral filter to smooth background noise while keeping sharp edges
             smoothed = cv2.bilateralFilter(gray, 9, 75, 75)
-            # Canny edge detection
             edges = cv2.Canny(smoothed, 30, 100)
             
-            # Clear 50px border of edges to prevent background outlines
             h, w = edges.shape
             border = 50
             edges[0:border, :] = 0
@@ -220,12 +232,10 @@ class Aligner:
             edges[:, 0:border] = 0
             edges[:, w-border:w] = 0
             
-            # Morphological dilation and closing to fill inside the part
             kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
             dilated = cv2.dilate(edges, kernel, iterations=4)
             closed = cv2.morphologyEx(dilated, cv2.MORPH_CLOSE, kernel, iterations=4)
             
-            # Clear mask border too
             closed[0:border, :] = 0
             closed[h-border:h, :] = 0
             closed[:, 0:border] = 0
@@ -237,34 +247,40 @@ class Aligner:
             valid_cnts = [c for c in cnts if cv2.contourArea(c) > 50000]
             if not valid_cnts:
                 return None
-            largest = max(valid_cnts, key=cv2.contourArea)
-            return cv2.boundingRect(largest)
+            return max(valid_cnts, key=cv2.contourArea)
 
-        ref_box = part_bbox(self.ref_bgr)
-        src_box = part_bbox(bgr)
-        if ref_box is None or src_box is None:
+        ref_cnt = part_contour(self.ref_bgr)
+        src_cnt = part_contour(bgr)
+        
+        if ref_cnt is None or src_cnt is None:
             return bgr, quality
 
-        rx, ry, rw, rh = ref_box
-        sx, sy, sw, sh = src_box
+        def get_rect_props(cnt):
+            (cx, cy), (w, h), angle = cv2.minAreaRect(cnt)
+            # Normalize angle so width is always > height
+            if w < h:
+                angle += 90
+                w, h = h, w
+            return cx, cy, w, h, angle
+
+        rx, ry, rw, rh, rangle = get_rect_props(ref_cnt)
+        sx, sy, sw, sh, sangle = get_rect_props(src_cnt)
 
         scale_x = rw / max(sw, 1)
         scale_y = rh / max(sh, 1)
         scale   = 0.5 * (scale_x + scale_y)
         
-        # Align centers of bboxes for maximum robustness
-        ref_cx = rx + rw / 2.0
-        ref_cy = ry + rh / 2.0
-        src_cx = sx + sw / 2.0
-        src_cy = sy + sh / 2.0
-        
-        tx      = ref_cx - src_cx * scale
-        ty      = ref_cy - src_cy * scale
+        delta_angle = rangle - sangle
 
-        M = np.array([[scale, 0, tx],
-                      [0, scale, ty]], dtype=np.float64)
+        # 1. Compute rotation and scale matrix around source center
+        M_rot_scale = cv2.getRotationMatrix2D((sx, sy), delta_angle, scale)
+        
+        # 2. Add translation to move source center to reference center
+        M_rot_scale[0, 2] += (rx - sx)
+        M_rot_scale[1, 2] += (ry - sy)
+
         h_ref, w_ref = self.ref_bgr.shape[:2]
-        warped  = cv2.warpAffine(bgr, M, (w_ref, h_ref),
+        warped  = cv2.warpAffine(bgr, M_rot_scale, (w_ref, h_ref),
                                  flags=cv2.INTER_LINEAR,
                                  borderMode=cv2.BORDER_REFLECT)
         aligned = cv2.resize(warped, (self.out_w, self.out_h),

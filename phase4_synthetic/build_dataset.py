@@ -32,6 +32,73 @@ sys.path.insert(0, str(ROOT))
 
 from phase3_roi.roi_extractor import ROIExtractor, FEATURE_NAMES
 from phase4_synthetic.defect_generator import DefectSynthesizer
+from utils.image_io import iter_images
+
+
+# ---------------------------------------------------------------------------
+# Label parsing — maps filename category to per-feature presence dict
+# ---------------------------------------------------------------------------
+
+# Features present in each named category (True = PRESENT, False = ABSENT)
+# If a key is absent from the dict, fall back to the category-wide default.
+_CATEGORY_LABELS = {
+    # All 7 features PRESENT
+    "perfect": {f: True  for f in FEATURE_NAMES},
+    # All 7 features ABSENT
+    "allmissing": {f: False for f in FEATURE_NAMES},
+    # Drill holes are done (PRESENT), spline + nibs are ABSENT
+    "onlydrilldone": {
+        "spline":      False,
+        "top_nib":     False,
+        "bottom_nib":  False,
+        "hole_tl":     True,
+        "hole_tr":     True,
+        "hole_bl":     True,
+        "hole_br":     True,
+    },
+    # Nibs are ABSENT, everything else PRESENT
+    "onlynibblingmissing": {
+        "spline":      True,
+        "top_nib":     False,
+        "bottom_nib":  False,
+        "hole_tl":     True,
+        "hole_tr":     True,
+        "hole_bl":     True,
+        "hole_br":     True,
+    },
+    # Alias for older naming conventions
+    "onlynibblingdone": {
+        "spline":      True,
+        "top_nib":     False,
+        "bottom_nib":  False,
+        "hole_tl":     True,
+        "hole_tr":     True,
+        "hole_bl":     True,
+        "hole_br":     True,
+    },
+}
+
+
+def _parse_labels(filename: str) -> dict:
+    """Return per-feature presence dict for a given aligned image filename.
+
+    Looks for a category keyword inside the filename (case-insensitive).
+    Falls back to 'allmissing' (all absent) for unknown defect names, or
+    'perfect' (all present) if the word 'perfect' appears.
+
+    Example
+    -------
+    >>> _parse_labels("Coated-onlydrilldone_aligned.jpg")
+    {'spline': False, 'top_nib': False, 'bottom_nib': False,
+     'hole_tl': True, 'hole_tr': True, 'hole_bl': True, 'hole_br': True}
+    """
+    lower = filename.lower()
+    # Check each category keyword, longest first to avoid substring confusion
+    for key in sorted(_CATEGORY_LABELS, key=len, reverse=True):
+        if key in lower:
+            return dict(_CATEGORY_LABELS[key])
+    # Fallback: treat as all-missing defect (conservative / safe)
+    return {f: False for f in FEATURE_NAMES}
 
 def load_config() -> dict:
     with open(ROOT / "config" / "config.yaml") as f:
@@ -55,7 +122,7 @@ def build():
     synth = DefectSynthesizer(cfg)
     augment_factor = int(cfg["synthetic"].get("augment_factor", 3))
 
-    all_files = sorted(aligned_dir.glob("*.jpg"))
+    all_files = list(iter_images(aligned_dir))
     if not all_files:
         print("[ERROR] No aligned images found. Run Phase 2 first.")
         sys.exit(1)
@@ -75,35 +142,39 @@ def build():
         bgr = cv2.imread(str(fp))
         if bgr is None:
             continue
-            
-        is_perfect = "perfect" in fp.name.lower()
-        
+
+        # Per-feature presence map derived from the filename category tag
+        label_map = _parse_labels(fp.name)
+        all_present = all(label_map.values())    # True only for "perfect" parts
+
         # 1. Extract raw ROIs
         raw_crops = extractor.extract(bgr, grayscale=True)
         roi_coords = extractor.get_roi_coords()
-        
+
         for feat in FEATURE_NAMES:
             crop = raw_crops[feat]
             group = "hole" if "hole" in feat else feat
-            
-            if is_perfect:
-                # Real PERFECT part -> feature is PRESENT
+            feature_present = label_map.get(feat, False)
+
+            if feature_present:
+                # Feature IS present in this image → save as PRESENT crop
                 out_path = roi_ds_dir / group / "present" / "{}_{}.jpg".format(fp.stem, feat)
                 cv2.imwrite(str(out_path), crop)
                 n_present += 1
-                
-                # Also generate synthetic ABSENT crops from this perfect image
-                for aug_idx in range(augment_factor):
-                    syn_bgr = synth.remove_feature(bgr, feat, roi_coords[feat])
-                    # extract the ROI from the inpainted image
-                    syn_crops = extractor.extract(syn_bgr, grayscale=True)
-                    syn_crop = syn_crops[feat]
-                    
-                    syn_path = roi_ds_dir / group / "absent" / "{}_{}_syn_{}.jpg".format(fp.stem, feat, aug_idx)
-                    cv2.imwrite(str(syn_path), syn_crop)
-                    n_absent += 1
+
+                # Only generate synthetic ABSENT from a fully-perfect image
+                # (partial images are already providing real absent examples)
+                if all_present:
+                    for aug_idx in range(augment_factor):
+                        syn_bgr = synth.remove_feature(bgr, feat, roi_coords[feat])
+                        syn_crops = extractor.extract(syn_bgr, grayscale=True)
+                        syn_crop = syn_crops[feat]
+                        syn_path = roi_ds_dir / group / "absent" / "{}_{}_syn_{}.jpg".format(
+                            fp.stem, feat, aug_idx)
+                        cv2.imwrite(str(syn_path), syn_crop)
+                        n_absent += 1
             else:
-                # Real DEFECT part (all missing) -> feature is ABSENT
+                # Feature IS absent in this image → save as ABSENT crop
                 out_path = roi_ds_dir / group / "absent" / "{}_{}.jpg".format(fp.stem, feat)
                 cv2.imwrite(str(out_path), crop)
                 n_absent += 1

@@ -36,7 +36,7 @@ class Inspector:
         
         self.img_size = t_cfg.get("image_size", 128)
         self.transform = get_val_transforms(self.img_size)
-        self.threshold = config["inference"].get("present_threshold", 0.60)
+        self.threshold = config["inference"].get("present_threshold", 0.50)
         self.max_reproj = config["inference"].get("max_reproj_error", 8.0)
         
         # Load the 4 models

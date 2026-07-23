@@ -38,6 +38,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from phase2_alignment.aligner import Aligner
+from utils.image_io import iter_images
 
 
 # ---------------------------------------------------------------------------
@@ -133,8 +134,8 @@ def run_qa(aligner: Aligner, cfg: dict, n_samples: int = 10) -> None:
     defect_dir  = Path(paths["defect_dir"])
 
     sample_files = (
-        sorted(perfect_dir.glob("*.jpg"))[:n_samples // 2] +
-        sorted(defect_dir.glob("*.jpg"))[:n_samples // 2]
+        list(iter_images(perfect_dir))[:n_samples // 2] +
+        list(iter_images(defect_dir))[:n_samples // 2]
     )
 
     print("\n[QA] Running alignment on {} sample images...".format(len(sample_files)))
@@ -197,8 +198,8 @@ def run_batch(aligner: Aligner, cfg: dict) -> None:
     defect_dir  = Path(paths["defect_dir"])
 
     all_files = (
-        [(fp, "perfect") for fp in sorted(perfect_dir.glob("*.jpg"))] +
-        [(fp, "defect")  for fp in sorted(defect_dir.glob("*.jpg"))]
+        [(fp, "perfect") for fp in iter_images(perfect_dir)] +
+        [(fp, "defect")  for fp in iter_images(defect_dir)]
     )
 
     print("\n[BATCH] Aligning {} images...".format(len(all_files)))

@@ -6,9 +6,9 @@ paths:
   roi_dataset_dir: C:/Users/Abhinandan/OneDrive/Desktop/Minor/inspection_system/roi_dataset
   models_dir: C:/Users/Abhinandan/OneDrive/Desktop/Minor/inspection_system/models
   outputs_dir: C:/Users/Abhinandan/OneDrive/Desktop/Minor/inspection_system/outputs
-  reference_image: C:/Users/Abhinandan/OneDrive/Desktop/Minor/perfect/perfect_full_0000.jpg
+  reference_image: C:/Users/Abhinandan/OneDrive/Desktop/Minor/perfect/Coated-perfect_20260715_210802.jpg
 alignment:
-  method: orb_homography
+  method: contour
   orb_features: 5000
   match_ratio: 0.75
   min_good_matches: 10
@@ -103,7 +103,7 @@ visualisation:
   panel_width: 400
 camera:
   type: ip_camera
-  url: http://10.80.82.71:8080/video
+  url: http://10.128.2.246:8080/video
   index: 0
   width: 1920
   height: 1080
