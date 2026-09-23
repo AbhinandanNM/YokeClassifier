@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YokeClassifier – Hardware Setup & Handover Document</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:       #0d1b2a;
+      --navy-mid:   #1b2e45;
+      --blue:       #1a4f8a;
+      --blue-light: #2466a8;
+      --accent:     #c8862a;
+      --accent-lt:  #e8a43c;
+      --text:       #1c1c1c;
+      --text-sec:   #4a4a4a;
+      --border:     #c5cdd8;
+      --bg-alt:     #f4f6f9;
+      --bg-stripe:  #eef1f5;
+      --warn-bg:    #fff3e0;
+      --warn-bd:    #e07b00;
+      --warn-text:  #7a3b00;
+      --pass:       #1a6b2f;
+      --fail:       #8b1a1a;
+      --font:       'Inter', sans-serif;
+      --mono:       'Roboto Mono', monospace;
+    }
+
+    body {
+      font-family: var(--font);
+      font-size: 11.5pt;
+      color: var(--text);
+      background: #e8ecf0;
+      line-height: 1.65;
+    }
+
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      background: #fff;
+      margin: 0 auto 20px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+      position: relative;
+      padding: 0;
+      page-break-after: always;
+    }
+
+    .page-header {
+      background: var(--navy);
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 24px;
+      font-size: 8pt;
+      letter-spacing: 0.04em;
+    }
+    .page-header .doc-id { font-family: var(--mono); opacity: 0.7; font-size: 7.5pt; }
+
+    .page-footer {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: var(--navy);
+      color: rgba(255,255,255,0.55);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 24px;
+      font-size: 7.5pt;
+      letter-spacing: 0.04em;
+    }
+
+    .content { padding: 20px 28px 56px; }
+
+    /* COVER */
+    .cover {
+      min-height: 297mm;
+      display: flex;
+      flex-direction: column;
+      background: var(--navy);
+      position: relative;
+      overflow: hidden;
+      page-break-after: always;
+    }
+    .cover::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 300px; height: 300px;
+      border: 40px solid rgba(255,255,255,0.04);
+      border-radius: 50%;
+    }
+    .cover::after {
+      content: '';
+      position: absolute;
+      bottom: 100px; left: -80px;
+      width: 220px; height: 220px;
+      border: 30px solid rgba(200,134,42,0.12);
+      border-radius: 50%;
+    }
+    .cover-top-bar { background: var(--accent); height: 6px; width: 100%; flex-shrink: 0; }
+    .cover-inner {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 40px 48px 40px;
+      position: relative;
+      z-index: 1;
+    }
+    .cover-kicker {
+      font-size: 8pt;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent-lt);
+      font-weight: 600;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .cover-kicker::before {
+      content: '';
+      display: inline-block;
+      width: 28px; height: 2px;
+      background: var(--accent);
+    }
+    .cover-title {
+      font-size: 38pt;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.06em;
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+    .cover-subtitle {
+      font-size: 13pt;
+      font-weight: 400;
+      color: rgba(255,255,255,0.75);
+      letter-spacing: 0.05em;
+      margin-bottom: 40px;
+    }
+    .cover-divider { width: 64px; height: 3px; background: var(--accent); margin-bottom: 32px; }
+    .cover-meta-block {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 48px;
+    }
+    .cover-meta-item { border-left: 3px solid var(--accent); padding-left: 12px; }
+    .cover-meta-label {
+      font-size: 7.5pt;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      font-weight: 500;
+      margin-bottom: 3px;
+    }
+    .cover-meta-value { font-size: 10.5pt; color: #fff; font-weight: 500; }
+    .cover-badge-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; }
+    .cover-badge {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.7);
+      font-size: 8pt;
+      letter-spacing: 0.1em;
+      padding: 5px 14px;
+      border-radius: 2px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+    .cover-bottom-bar {
+      background: rgba(0,0,0,0.35);
+      padding: 14px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+      border-top: 2px solid var(--accent);
+      position: relative;
+      z-index: 1;
+    }
+    .cover-bottom-label {
+      font-size: 7.5pt;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+    }
+    .cover-bottom-val { font-size: 8.5pt; color: rgba(255,255,255,0.7); font-family: var(--mono); }
+
+    /* SECTION HEADING */
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--navy);
+    }
+    .section-num {
+      background: var(--navy);
+      color: #fff;
+      font-size: 8.5pt;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 2px;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .section-title { font-size: 14pt; font-weight: 700; color: var(--navy); letter-spacing: 0.01em; }
+    .sub-heading {
+      font-size: 11pt;
+      font-weight: 600;
+      color: var(--blue);
+      margin: 18px 0 8px;
+      padding-left: 10px;
+      border-left: 3px solid var(--accent);
+    }
+
+    /* TABLES */
+    table { width: 100%; border-collapse: collapse; font-size: 10pt; margin: 10px 0 16px; }
+    thead th {
+      background: var(--navy);
+      color: #fff;
+      padding: 8px 10px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 9pt;
+      letter-spacing: 0.04em;
+    }
+    tbody tr:nth-child(even) { background: var(--bg-stripe); }
+    tbody tr:nth-child(odd)  { background: #fff; }
+    tbody td { padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+    tbody tr:last-child td { border-bottom: 2px solid var(--navy); }
+    .col-num  { width: 36px; text-align: center; font-weight: 700; color: var(--blue); }
+    .col-cost { white-space: nowrap; font-family: var(--mono); font-size: 9.5pt; }
+    .total-row td { background: var(--navy) !important; color: #fff !important; font-weight: 700; font-size: 10pt; }
+
+    /* FLOW DIAGRAM */
+    .flow-diagram {
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      margin: 12px 0;
+    }
+    .flow-node {
+      background: var(--navy);
+      color: #fff;
+      font-size: 9.5pt;
+      font-weight: 600;
+      padding: 9px 28px;
+      border-radius: 3px;
+      text-align: center;
+      letter-spacing: 0.04em;
+      min-width: 230px;
+    }
+    .flow-node.accent-node { background: var(--blue); }
+    .flow-node.result-pass { background: var(--pass); }
+    .flow-node.result-fail { background: var(--fail); }
+    .flow-arrow { font-size: 14pt; color: var(--accent); line-height: 1; padding: 2px 0; }
+    .flow-label { font-size: 7.5pt; color: var(--text-sec); letter-spacing: 0.08em; text-transform: uppercase; margin-top: -2px; margin-bottom: 2px; }
+
+    /* CONNECTION DIAGRAM */
+    .conn-diagram {
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 22px 28px;
+      font-family: var(--mono);
+      font-size: 9.5pt;
+      line-height: 2;
+      color: var(--text);
+      margin: 12px 0;
+    }
+    .conn-center { text-align: center; margin-bottom: 6px; }
+    .conn-device { display: inline-block; background: var(--navy); color: #fff; padding: 4px 16px; border-radius: 2px; font-weight: 600; font-size: 9pt; }
+    .conn-peripheral { display: inline-block; background: var(--blue); color: #fff; padding: 3px 12px; border-radius: 2px; font-size: 8.5pt; }
+    .conn-interface { display: inline-block; background: var(--accent); color: #fff; padding: 2px 10px; border-radius: 2px; font-size: 8pt; font-weight: 700; letter-spacing: 0.08em; }
+    .conn-power { display: inline-block; background: #5a5a5a; color: #fff; padding: 2px 10px; border-radius: 2px; font-size: 8pt; }
+    .conn-arrow { color: var(--accent); font-size: 13pt; }
+
+    /* LAYOUT DIAGRAM */
+    .layout-diagram {
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      margin: 12px 0;
+    }
+    .layout-node { background: var(--navy); color: #fff; font-size: 9pt; font-weight: 600; padding: 6px 22px; border-radius: 3px; text-align: center; min-width: 170px; letter-spacing: 0.03em; }
+    .layout-node.green  { background: var(--pass); }
+    .layout-node.blue   { background: var(--blue); }
+    .layout-node.fail   { background: var(--fail); }
+    .layout-arrow { font-size: 13pt; color: var(--accent); line-height: 1; padding: 1px 0; }
+    .layout-branch { display: flex; gap: 40px; align-items: flex-start; justify-content: center; }
+    .layout-branch-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .branch-arrow-row { display: flex; gap: 40px; justify-content: center; margin: 0; }
+    .branch-arrow { font-size: 13pt; color: var(--accent); width: 170px; text-align: center; }
+
+    /* STEP BOX */
+    .step-box {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--blue);
+      border-radius: 3px;
+      padding: 10px 14px;
+    }
+    .step-num { background: var(--blue); color: #fff; font-size: 10pt; font-weight: 700; min-width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .step-content h4 { font-size: 10.5pt; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
+    .step-content p { font-size: 10pt; color: var(--text-sec); line-height: 1.5; }
+
+    /* WARNING / INFO BOXES */
+    .warning-box {
+      background: var(--warn-bg);
+      border: 1px solid var(--warn-bd);
+      border-left: 5px solid var(--warn-bd);
+      border-radius: 3px;
+      padding: 14px 18px;
+      margin: 10px 0;
+    }
+    .warning-box .warn-title { font-size: 10.5pt; font-weight: 700; color: var(--warn-text); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
+    .warning-box ul { padding-left: 18px; margin: 0; color: var(--warn-text); }
+    .warning-box ul li { margin-bottom: 4px; font-size: 10pt; }
+    .info-box { background: #e8f0fb; border: 1px solid #b3caea; border-left: 5px solid var(--blue); border-radius: 3px; padding: 12px 16px; margin: 10px 0; font-size: 10.5pt; color: var(--navy); }
+    .info-box strong { color: var(--blue); }
+
+    /* SIGN-OFF */
+    .signoff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 14px 0; }
+    .signoff-card { border: 1px solid var(--border); border-top: 3px solid var(--navy); border-radius: 3px; padding: 16px; background: var(--bg-alt); }
+    .signoff-card .card-title { font-size: 10pt; font-weight: 700; color: var(--navy); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+    .signoff-field { margin-bottom: 14px; }
+    .signoff-label { font-size: 8pt; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-sec); margin-bottom: 4px; }
+    .signoff-line { border-bottom: 1px solid #999; height: 22px; width: 100%; }
+
+    /* TEST BOX */
+    .test-box { border: 1px solid var(--border); border-radius: 3px; overflow: hidden; margin-bottom: 14px; }
+    .test-box-header { padding: 8px 14px; font-weight: 700; font-size: 10pt; letter-spacing: 0.05em; text-transform: uppercase; color: #fff; }
+    .test-box-header.pass { background: var(--pass); }
+    .test-box-header.fail { background: var(--fail); }
+    .test-box-body { padding: 12px 14px; background: #fff; font-size: 10pt; }
+    .test-box-body ul { padding-left: 18px; }
+    .test-box-body li { margin-bottom: 4px; }
+    .test-label { font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-sec); margin-bottom: 4px; margin-top: 8px; }
+
+    /* HANDOVER STATEMENT */
+    .handover-statement {
+      background: var(--navy);
+      color: #fff;
+      border-radius: 4px;
+      padding: 24px 40px;
+      font-size: 11pt;
+      line-height: 1.8;
+      text-align: center;
+      margin: 14px 0;
+      border-left: 5px solid var(--accent);
+    }
+
+    /* RESPONSIBILITY TABLE */
+    .resp-responsible { color: var(--pass); font-weight: 700; }
+    .resp-verify      { color: var(--blue); font-weight: 600; }
+    .resp-not         { color: #999; font-style: italic; }
+    .resp-joint       { color: var(--accent); font-weight: 700; }
+    .resp-support     { color: var(--text-sec); }
+
+    /* MISC */
+    p { margin-bottom: 8px; font-size: 10.5pt; }
+    ul, ol { padding-left: 20px; margin-bottom: 8px; }
+    li { margin-bottom: 3px; font-size: 10.5pt; }
+    .text-muted { color: var(--text-sec); font-size: 10pt; }
+    .section-sep { height: 24px; }
+    .checklist-cb { font-size: 13pt; color: var(--border); text-align: center; }
+
+    @media print {
+      body { background: #fff; }
+      .page { box-shadow: none; margin: 0; width: 100%; page-break-after: always; }
+      @page { size: A4; margin: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover">
+  <div class="cover-top-bar"></div>
+  <div class="cover-inner">
+    <div class="cover-kicker">Industrial Visual Inspection System</div>
+    <div class="cover-title">YOKE<br/>CLASSIFIER</div>
+    <div class="cover-subtitle">Hardware Setup &amp; Handover Document</div>
+    <div class="cover-divider"></div>
+    <div class="cover-meta-block">
+      <div class="cover-meta-item">
+        <div class="cover-meta-label">Project</div>
+        <div class="cover-meta-value">YokeClassifier</div>
+      </div>
+      <div class="cover-meta-item">
+        <div class="cover-meta-label">Document Type</div>
+        <div class="cover-meta-value">Hardware Handover</div>
+      </div>
+      <div class="cover-meta-item">
+        <div class="cover-meta-label">Prepared By</div>
+        <div class="cover-meta-value">Abhinandan N M</div>
+      </div>
+      <div class="cover-meta-item">
+        <div class="cover-meta-label">Branch / Department</div>
+        <div class="cover-meta-value">Computer Science and Engineering</div>
+      </div>
+      <div class="cover-meta-item">
+        <div class="cover-meta-label">Institution</div>
+        <div class="cover-meta-value">KLE Technological University, Hubballi</div>
+      </div>
+      <div class="cover-meta-item">
+        <div class="cover-meta-label">Document Reference</div>
+        <div class="cover-meta-value" style="font-family:var(--mono);font-size:9pt;">YC-HW-HANDOVER-001</div>
+      </div>
+    </div>
+    <div class="cover-badge-row">
+      <span class="cover-badge">Rev 1.0</span>
+      <span class="cover-badge">Confidential – Project Use Only</span>
+      <span class="cover-badge">Hardware Team Distribution</span>
+    </div>
+    <div class="info-box" style="background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.2);border-left-color:var(--accent);color:rgba(255,255,255,0.85);font-size:10pt;">
+      <strong style="color:var(--accent-lt);">NOTE:</strong> The YokeClassifier software and trained machine-learning model are
+      <strong style="color:#fff;">100% complete and operational</strong>. This document covers
+      <strong style="color:#fff;">hardware installation, connection, and handover only</strong>.
+      No software modification is required.
+    </div>
+  </div>
+  <div class="cover-bottom-bar">
+    <div>
+      <div class="cover-bottom-label">KLE Technological University, Hubballi</div>
+      <div class="cover-bottom-label" style="margin-top:2px;">Department of Computer Science and Engineering</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="cover-bottom-val">YC-HW-HANDOVER-001</div>
+      <div class="cover-bottom-label" style="margin-top:2px;">Page 1 of 10</div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2: Purpose + System Overview -->
+<div class="page">
+  <div class="page-header">
+    <span>YOKECLASSIFIER — Hardware Setup &amp; Handover Document</span>
+    <span class="doc-id">YC-HW-HANDOVER-001 · Rev 1.0</span>
+  </div>
+  <div class="content">
+    <div class="section-heading">
+      <span class="section-num">§ 1</span>
+      <span class="section-title">Document Purpose</span>
+    </div>
+    <p>This document is intended for the <strong>hardware setup team</strong> responsible for the physical installation, connection, and commissioning of the YokeClassifier inspection station. It provides all guidance required to procure, install, connect, and verify the hardware needed to bring the inspection station to operational readiness.</p>
+    <p>This document covers:</p>
+    <ul>
+      <li>Hardware Bill of Materials (BOM) and procurement reference</li>
+      <li>Physical installation of all hardware components</li>
+      <li>Camera mounting, alignment, and positional requirements</li>
+      <li>Fixture/jig installation and placement</li>
+      <li>LED lighting installation and configuration</li>
+      <li>Display installation and connection</li>
+      <li>Buzzer installation and connection</li>
+      <li>Wiring, power, and cable management</li>
+      <li>Hardware-level verification checklist</li>
+      <li>Final handover procedure and sign-off</li>
+    </ul>
+    <div class="info-box" style="margin-top:12px;">
+      <strong>Important:</strong> The YokeClassifier software and trained machine-learning inspection model are <strong>fully complete and operational</strong>. The project/software team will connect the operational software to the installed hardware during final system verification. <strong>No software modification, rewriting, or retraining is required at any stage of this handover.</strong>
+    </div>
+
+    <div class="section-sep"></div>
+
+    <div class="section-heading">
+      <span class="section-num">§ 2</span>
+      <span class="section-title">System Overview</span>
+    </div>
+    <p>YokeClassifier is a real-time automated visual inspection system for manufactured automotive yoke components. The completed system performs the following operational sequence:</p>
+    <div class="flow-diagram">
+      <div class="flow-node">OPERATOR places yoke component</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-label">Consistent positioning</div>
+      <div class="flow-node">FIXTURE / JIG holds component in fixed orientation</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-label">Image acquisition</div>
+      <div class="flow-node accent-node">CAMERA captures component image</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-label">USB video stream to Mini PC</div>
+      <div class="flow-node accent-node">MINI PC — YokeClassifier processes image</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-label">Automated inspection result</div>
+      <div class="flow-node">Inspection regions identified &amp; highlighted on display</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-label">Result output</div>
+      <div style="display:flex;gap:24px;justify-content:center;">
+        <div class="flow-node result-pass" style="min-width:160px;">DISPLAY: PASS ✓</div>
+        <div class="flow-node result-fail" style="min-width:160px;">DISPLAY: FAIL ✗ + BUZZER</div>
+      </div>
+    </div>
+    <p class="text-muted" style="margin-top:8px;font-size:9pt;text-align:center;">All software logic, inspection algorithms, and model parameters are pre-configured. Hardware installation does not require any software changes.</p>
+  </div>
+  <div class="page-footer">
+    <span>KLE Technological University, Hubballi — Department of Computer Science and Engineering</span>
+    <span>Page 2 of 10</span>
+  </div>
+</div>
+
+<!-- PAGE 3: BOM -->
+<div class="page">
+  <div class="page-header">
+    <span>YOKECLASSIFIER — Hardware Setup &amp; Handover Document</span>
+    <span class="doc-id">YC-HW-HANDOVER-001 · Rev 1.0</span>
+  </div>
+  <div class="content">
+    <div class="section-heading">
+      <span class="section-num">§ 3</span>
+      <span class="section-title">Hardware Bill of Materials</span>
+    </div>
+    <p>All components listed below are required for commissioning the YokeClassifier inspection station. Quantities and specifications must not be reduced without consultation with the project/software team.</p>
+    <table>
+      <thead>
+        <tr>
+          <th class="col-num">#</th>
+          <th>Component</th>
+          <th>Recommended Model / Specification</th>
+          <th>Qty</th>
+          <th>Purpose</th>
+          <th>Approx. Cost (INR)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-num">1</td>
+          <td><strong>Compute Unit</strong></td>
+          <td>Intel N100 Mini PC — Beelink S12 Pro or equivalent</td>
+          <td>1</td>
+          <td>Runs YokeClassifier; connects to all peripherals</td>
+          <td class="col-cost">₹12,000 – ₹15,000</td>
+        </tr>
+        <tr>
+          <td class="col-num">2</td>
+          <td><strong>Camera</strong></td>
+          <td>ELP 2MP USB Global Shutter Camera</td>
+          <td>1</td>
+          <td>Captures the yoke component image for inspection</td>
+          <td class="col-cost">₹6,000 – ₹7,000</td>
+        </tr>
+        <tr>
+          <td class="col-num">3</td>
+          <td><strong>Display</strong></td>
+          <td>7-inch HDMI Display — Waveshare or equivalent</td>
+          <td>1</td>
+          <td>Shows the inspection interface and PASS/FAIL status</td>
+          <td class="col-cost">₹3,000 – ₹4,000</td>
+        </tr>
+        <tr>
+          <td class="col-num">4</td>
+          <td><strong>Fixture / Jig</strong></td>
+          <td>Custom fixture fabricated to yoke component dimensions</td>
+          <td>1</td>
+          <td>Holds the yoke in a consistent, repeatable orientation</td>
+          <td class="col-cost">₹2,000 – ₹3,000</td>
+        </tr>
+        <tr>
+          <td class="col-num">5</td>
+          <td><strong>Camera Mount</strong></td>
+          <td>Adjustable metal stand / copy stand</td>
+          <td>1</td>
+          <td>Maintains fixed camera position above the inspection fixture</td>
+          <td class="col-cost">₹2,000 – ₹5,000</td>
+        </tr>
+        <tr>
+          <td class="col-num">6</td>
+          <td><strong>LED Ring Light</strong></td>
+          <td>Industrial LED ring light (suitable aperture for camera)</td>
+          <td>1</td>
+          <td>Provides uniform, shadow-free illumination of inspection area</td>
+          <td class="col-cost">₹800 – ₹1,500</td>
+        </tr>
+        <tr>
+          <td class="col-num">7</td>
+          <td><strong>USB Buzzer</strong></td>
+          <td>5V USB programmable buzzer</td>
+          <td>1</td>
+          <td>Audible FAIL alert to the operator</td>
+          <td class="col-cost">₹500 – ₹1,000</td>
+        </tr>
+        <tr>
+          <td class="col-num">8</td>
+          <td><strong>Power &amp; Cables</strong></td>
+          <td>Power strip, USB cables, HDMI cable, power adapters</td>
+          <td>1 set</td>
+          <td>Power supply and connectivity for all components</td>
+          <td class="col-cost">₹500 – ₹1,000</td>
+        </tr>
+        <tr class="total-row">
+          <td colspan="5" style="text-align:right;padding-right:14px;letter-spacing:0.06em;">ESTIMATED TOTAL DEPLOYMENT COST</td>
+          <td class="col-cost" style="font-family:var(--mono);">₹25,000 – ₹35,000</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="text-muted" style="font-size:9pt;">* Actual cost depends on the selected hardware vendor, regional availability, and custom fixture fabrication charges. Costs above are indicative reference values.</p>
+
+    <div class="section-sep"></div>
+
+    <div class="section-heading">
+      <span class="section-num">§ 4</span>
+      <span class="section-title">Hardware Installation Responsibilities</span>
+    </div>
+
+    <div class="sub-heading">4.1 Hardware Setup Team</div>
+    <p>The hardware setup team is solely responsible for:</p>
+    <ol>
+      <li>Providing / procuring all hardware listed in the Bill of Materials (§ 3).</li>
+      <li>Installing the Mini PC in a secure, ventilated location.</li>
+      <li>Mounting the camera on the adjustable stand at the correct position above the fixture.</li>
+      <li>Installing and securing the inspection fixture / jig on the workstation surface.</li>
+      <li>Installing the LED ring light to provide uniform illumination of the inspection area.</li>
+      <li>Installing and connecting the display to the Mini PC via HDMI.</li>
+      <li>Connecting the USB buzzer to the Mini PC.</li>
+      <li>Connecting all power and data cables between components.</li>
+      <li>Securing and routing all cables to prevent obstruction and trip hazards.</li>
+      <li>Ensuring the physical stability of the entire inspection station.</li>
+      <li>Completing the hardware-level verification checklist (§ 9).</li>
+      <li>Coordinating with the project/software team for final functional verification.</li>
+    </ol>
+
+    <div class="sub-heading">4.2 Project / Software Team</div>
+    <p>After hardware installation is complete, the project/software team will:</p>
+    <ol>
+      <li>Connect the completed YokeClassifier software to the installed hardware.</li>
+      <li>Verify that the camera feed is correctly received by the system.</li>
+      <li>Verify the inspection interface displays correctly on the connected display.</li>
+      <li>Verify PASS/FAIL detection with known test components.</li>
+      <li>Verify buzzer response on a FAIL detection event.</li>
+      <li>Perform final system-level validation and sign-off.</li>
+    </ol>
+    <div class="info-box">
+      <strong>Clarification:</strong> The project/software team is <strong>not required to rewrite, retrain, modify, or debug</strong> the YokeClassifier software. The software is complete. Their role in this handover is limited to final integration verification with the installed hardware.
+    </div>
+  </div>
+  <div class="page-footer">
+    <span>KLE Technological University, Hubballi — Department of Computer Science and Engineering</span>
+    <span>Page 3 of 10</span>
+  </div>
+</div>
+
+<!-- PAGE 4: Physical Installation -->
+<div class="page">
+  <div class="page-header">
+    <span>YOKECLASSIFIER — Hardware Setup &amp; Handover Document</span>
+    <span class="doc-id">YC-HW-HANDOVER-001 · Rev 1.0</span>
+  </div>
+  <div class="content">
+    <div class="section-heading">
+      <span class="section-num">§ 5</span>
+      <span class="section-title">Physical Installation Requirements</span>
+    </div>
+
+    <div class="sub-heading">5.1 Compute Unit (Mini PC)</div>
+    <ul>
+      <li>Install the Mini PC securely on the workstation or in a designated enclosure.</li>
+      <li>Ensure adequate ventilation clearance on all sides; do not enclose without airflow.</li>
+      <li>Protect the unit from dust, vibration, and risk of accidental impact.</li>
+      <li>Provide a stable, regulated power supply.</li>
+      <li>Position it such that all required cables can be routed cleanly without strain on connectors.</li>
+    </ul>
+
+    <div class="sub-heading">5.2 Camera</div>
+    <ul>
+      <li>Mount the camera securely on the adjustable stand; lock all adjustable joints firmly after positioning.</li>
+      <li>Point the camera lens directly toward the inspection fixture from above.</li>
+      <li>Ensure the entire required inspection region of the yoke component is visible within the camera frame.</li>
+      <li>Verify there is no vibration transmitted to the camera mount from nearby machinery.</li>
+      <li>Avoid unnecessary movement of the camera after final positioning.</li>
+    </ul>
+    <div class="warning-box">
+      <div class="warn-title">⚠ Camera Position Warning</div>
+      <ul>
+        <li>The camera position, height, angle, and distance are calibrated to the validated inspection setup.</li>
+        <li><strong>Do not change the camera position after final verification without consulting the project/software team.</strong></li>
+        <li>Any change in camera geometry may require full re-validation of the inspection system.</li>
+      </ul>
+    </div>
+
+    <div class="sub-heading">5.3 Fixture / Jig</div>
+    <p>The inspection fixture is critical for consistent, repeatable results. The fixture must:</p>
+    <ul>
+      <li>Hold the yoke component in the same orientation for every inspection cycle.</li>
+      <li>Prevent any unwanted movement of the component during inspection.</li>
+      <li>Maintain a consistent orientation relative to the camera's field of view.</li>
+      <li>Allow the operator to load and unload components easily and quickly.</li>
+      <li>Keep the component entirely within the camera's intended inspection area.</li>
+    </ul>
+    <p class="text-muted">Notify the project/software team before any fixture modification.</p>
+
+    <div class="sub-heading">5.4 LED Ring Light</div>
+    <p>Consistent, uniform illumination is essential for reliable inspection results.</p>
+    <ul>
+      <li>Mount the LED ring light around or adjacent to the camera lens, directed at the inspection area.</li>
+      <li>Position the light to provide uniform, even illumination across the entire component surface.</li>
+    </ul>
+    <p>Avoid the following conditions:</p>
+    <ul>
+      <li><strong>Harsh shadows</strong> caused by indirect or angled light sources.</li>
+      <li><strong>Glare or hot-spots</strong> on the component surface.</li>
+      <li><strong>Strong reflections</strong> from metallic yoke surfaces.</li>
+      <li><strong>Uneven illumination</strong> between different regions of the component.</li>
+    </ul>
+    <p class="text-muted">Once the lighting position is validated, it must remain fixed.</p>
+
+    <div class="sub-heading">5.5 Display</div>
+    <ul>
+      <li>Mount or place the display so the operator can clearly see it while loading/unloading components.</li>
+      <li>Connect via HDMI to the Mini PC.</li>
+      <li>The display must clearly present: the live camera feed, highlighted inspection regions, PASS status, FAIL status, and any other information shown by YokeClassifier.</li>
+    </ul>
+
+    <div class="sub-heading">5.6 USB Buzzer</div>
+    <ul>
+      <li>Connect the USB buzzer to an available USB port on the Mini PC.</li>
+      <li>Position the buzzer so the alert tone is clearly audible to the operator at the working position.</li>
+      <li>The buzzer is activated automatically by YokeClassifier upon a FAIL detection event.</li>
+    </ul>
+  </div>
+  <div class="page-footer">
+    <span>KLE Technological University, Hubballi — Department of Computer Science and Engineering</span>
+    <span>Page 4 of 10</span>
+  </div>
+</div>
+
+<!-- PAGE 5: Connection Diagram + Layout -->
+<div class="page">
+  <div class="page-header">
+    <span>YOKECLASSIFIER — Hardware Setup &amp; Handover Document</span>
+    <span class="doc-id">YC-HW-HANDOVER-001 · Rev 1.0</span>
+  </div>
+  <div class="content">
+    <div class="section-heading">
+      <span class="section-num">§ 6</span>
+      <span class="section-title">System Connection Diagram</span>
+    </div>
+    <p>The diagram below shows all required hardware connections. No special interfaces beyond standard USB and HDMI are required.</p>
+
+    <div class="conn-diagram">
+      <div class="conn-center" style="margin-bottom:10px;">
+        <span class="conn-device">INTEL N100 MINI PC</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 50px 1fr;gap:8px 14px;align-items:center;margin:4px 0;">
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="conn-peripheral">ELP USB Camera</span>
+            <span class="conn-arrow">→</span>
+            <span class="conn-interface">USB</span>
+            <span class="conn-arrow">→</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="conn-peripheral">USB Buzzer</span>
+            <span class="conn-arrow">→</span>
+            <span class="conn-interface">USB</span>
+            <span class="conn-arrow">→</span>
+          </div>
+        </div>
+        <div style="text-align:center;color:var(--blue);font-size:22pt;font-weight:200;">⇌</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="conn-arrow">←</span>
+            <span class="conn-interface">HDMI</span>
+            <span class="conn-arrow">←</span>
+            <span class="conn-peripheral">7" HDMI Display</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="border-top:1px dashed var(--border);margin:12px 0;padding-top:12px;">
+        <div style="font-size:8pt;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-sec);margin-bottom:10px;text-align:center;">Power Connections — via Power Strip</div>
+        <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="conn-power">Power Strip</span>
+            <span class="conn-arrow">→</span>
+            <span class="conn-power">Mini PC (AC adapter)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="conn-power">Power Strip</span>
+            <span class="conn-arrow">→</span>
+            <span class="conn-power">Display (adapter)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="conn-power">Power Strip</span>
+            <span class="conn-arrow">→</span>
+            <span class="conn-power">LED Ring Light</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="border-top:1px dashed var(--border);margin-top:10px;padding-top:8px;display:flex;gap:16px;justify-content:center;font-size:8pt;color:var(--text-sec);flex-wrap:wrap;">
+        <span><span class="conn-interface" style="font-size:7.5pt;">USB</span> USB 2.0 / 3.0 cable</span>
+        <span><span class="conn-interface" style="font-size:7.5pt;">HDMI</span> Standard HDMI cable</span>
+        <span><span class="conn-power" style="font-size:7.5pt;">POWER</span> Mains / DC power</span>
+      </div>
+    </div>
+
+    <div class="section-sep"></div>
+
+    <div class="section-heading">
+      <span class="section-num">§ 7</span>
+      <span class="section-title">Recommended Physical Layout</span>
+    </div>
+    <p>The diagram below shows the recommended spatial arrangement of components at the inspection station.</p>
+    <div class="layout-diagram">
+      <div class="layout-node" style="background:#5a5a5a;">OPERATOR</div>
+      <div class="layout-arrow">↓</div>
+      <div class="layout-node" style="background:#5a5a5a;">YOKE COMPONENT</div>
+      <div class="layout-arrow">↓</div>
+      <div class="layout-node blue">FIXTURE / JIG</div>
+      <div class="layout-arrow">↓</div>
+      <div class="layout-node blue">CAMERA + LED RING LIGHT</div>
+      <div class="layout-arrow">↓</div>
+      <div class="layout-node">INTEL N100 MINI PC</div>
+      <div class="branch-arrow-row">
+        <div class="branch-arrow">↙</div>
+        <div class="branch-arrow">↘</div>
+      </div>
+      <div class="layout-branch">
+        <div class="layout-branch-item">
+          <div class="layout-node green" style="min-width:130px;">DISPLAY</div>
+        </div>
+        <div class="layout-branch-item">
+          <div class="layout-node fail" style="min-width:130px;">BUZZER</div>
+        </div>
+      </div>
+    </div>
+    <p class="text-muted" style="font-size:9pt;margin-top:6px;">
+      The camera and LED ring light must remain in a <strong>fixed position relative to the fixture</strong> at all times after final validation. The display should be positioned at a comfortable viewing angle for the operator's standing position.
+    </p>
+  </div>
+  <div class="page-footer">
+    <span>KLE Technological University, Hubballi — Department of Computer Science and Engineering</span>
+    <span>Page 5 of 10</span>
+  </div>
+</div>
+
+<!-- PAGE 6: Installation Procedure -->
+<div class="page">
+  <div class="page-header">
+    <span>YOKECLASSIFIER — Hardware Setup &amp; Handover Document</span>
+    <span class="doc-id">YC-HW-HANDOVER-001 · Rev 1.0</span>
+  </div>
+  <div class="content">
+    <div class="section-heading">
+      <span class="section-num">§ 8</span>
+      <span class="section-title">Step-by-Step Installation Procedure</span>
+    </div>
+    <p>Follow the steps below in sequence. Do not skip steps or change the order without prior consultation.</p>
+
+    <div class="step-box">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Install the Inspection Fixture / Jig</h4>
+        <p>Place the custom inspection fixture on the workstation surface at the designated inspection position. Secure it firmly so it does not shift during operation. Verify that the component loading area is accessible.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Install the Camera Mount / Stand</h4>
+        <p>Position the adjustable camera stand such that its arm is centered above the inspection fixture. Ensure the stand base is stable and cannot tip. Do not tighten arm joints fully at this stage.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Mount the Camera</h4>
+        <p>Attach the ELP USB camera to the mount. Orient the lens directly downward toward the fixture. Adjust height so the component will be fully visible. Final tightening occurs in Step 5.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Install the LED Ring Light</h4>
+        <p>Attach the LED ring light around or adjacent to the camera lens so that light is directed at the inspection fixture. Connect the ring light power supply to the power strip.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h4>Align Camera and Lighting</h4>
+        <p>Place a sample yoke component in the fixture. Verify that the entire inspection area is visible in the camera frame. Adjust camera height, angle, and ring light position to achieve uniform, glare-free illumination. Tighten and lock all mount joints firmly. Record the final camera height and position for reference.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <h4>Install the Mini PC</h4>
+        <p>Place the Intel N100 Mini PC in a secure, ventilated location on or adjacent to the workstation. Ensure adequate clearance around all ventilation openings. Connect the power adapter to the Mini PC and to the power strip.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-num">7</div>
+      <div class="step-content">
+        <h4>Install the Display</h4>
+        <p>Place or mount the 7-inch HDMI display at a position clearly visible to the operator. Connect the HDMI cable from the display to the Mini PC's HDMI port. Connect the display power supply to the power strip.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-num">8</div>
+      <div class="step-content">
+        <h4>Connect the Buzzer</h4>
+        <p>Plug the USB buzzer into an available USB port on the Mini PC. Position the buzzer so its alert tone is clearly audible to the operator from the standard working position.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-num">9</div>
+      <div class="step-content">
+        <h4>Connect the Camera</h4>
+        <p>Connect the ELP USB camera to an available USB port on the Mini PC. Ensure the cable has sufficient slack to allow minor positional adjustment without stressing the connector.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-num">10</div>
+      <div class="step-content">
+        <h4>Secure and Route All Cables</h4>
+        <p>Route all cables (USB, HDMI, power) along the workstation frame or through cable management channels. Fasten cables using cable ties or clips. Ensure no cables cross the operator's working area or create trip hazards.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-num">11</div>
+      <div class="step-content">
+        <h4>Power On and Hardware Verification</h4>
+        <p>Switch on the power strip. Power on the Mini PC, display, and ring light. Complete the Hardware Verification Checklist (§ 9). Do not launch YokeClassifier software — that is the responsibility of the project/software team.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-num">12</div>
+      <div class="step-content">
+        <h4>Coordinate Final System Verification</h4>
+        <p>Notify the project/software team that hardware installation is complete and the verification checklist has been signed off. The project/software team will then perform final functional verification of the YokeClassifier system on the installed hardware.</p>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer">
+    <span>KLE Technological University, Hubballi — Department of Computer Science and Engineering</span>
+    <span>Page 6 of 10</span>
+  </div>
+</div>
+
+<!-- PAGE 7: Verification Checklist + Functional Verification -->
+<div class="page">
+  <div class="page-header">
+    <span>YOKECLASSIFIER — Hardware Setup &amp; Handover Document</span>
+    <span class="doc-id">YC-HW-HANDOVER-001 · Rev 1.0</span>
+  </div>
+  <div class="content">
+    <div class="section-heading">
+      <span class="section-num">§ 9</span>
+      <span class="section-title">Hardware Verification Checklist</span>
+    </div>
+    <p>The hardware setup team must verify each item and initial the <em>Verified By</em> column. All items must be checked before handover to the project/software team.</p>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:30px;text-align:center;">✓</th>
+          <th style="width:32px;">#</th>
+          <th>Verification Item</th>
+          <th style="width:80px;">Verified By</th>
+          <th style="width:72px;">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="checklist-cb">☐</td><td>1</td><td>Mini PC is securely installed and does not move</td><td></td><td></td></tr>
+        <tr><td class="checklist-cb">☐</td><td>2</td><td>Mini PC has stable, uninterrupted power supply</td><td></td><td></td></tr>
+        <tr><td class="checklist-cb">☐</td><td>3</td><td>Adequate ventilation clearance provided to Mini PC</td><td></td><td></td></tr>
+        <tr><td class="checklist-cb">☐</td><td>4</td><td>Camera is securely mounted; all mount joints are locked</td><td></td><td></td></tr>
+        <tr><td class="checklist-cb">☐</td><td>5</td><td>Camera lens is aligned with and pointing at the fixture</td><td></td><td></td></tr>
+        <tr><td class="checklist-cb">☐</td><td>6</td><td>Complete inspection region of the yoke is visible in frame</td><td></td><td></td></tr>
+        <tr><td class="checklist-cb">☐</td><td>7</td><td>Inspection fixture / jig is securely fastened to workstation</td><td></td><td></td></tr>
+        <tr><td class="checklist-cb">☐</td><td>8</td><td>Component can be loaded and unloaded easily and repeatably</td><td></td><td></td></tr>
+        <tr><td class="checklist-cb">☐</td><td>9</td><td>LED ring light is installed and powered on</td><td></td><td></td></tr>
+        <tr><td class="checklist-cb">☐</td><td>10</td><td>Lighting provides uniform, shadow-free illumination</td><td></td><td></td></tr>
+        <tr><td class="checklist-cb">☐</td><td>11</td><td>Display is connected to Mini PC via HDMI</td><td></td><td></td></tr>
+        <tr><td class="checklist-cb">☐</td><td>12</td><td>Display is clearly visible from the operator's working position</td><td></td><td></td></tr>
+        <tr><td class="checklist-cb">☐</td><td>13</td><td>USB buzzer is connected to the Mini PC</td><td></td><td></td></tr>
+        <tr><td class="checklist-cb">☐</td><td>14</td><td>Buzzer is audible to the operator at the working position</td><td></td><td></td></tr>
+        <tr><td class="checklist-cb">☐</td><td>15</td><td>All USB connections are firm and fully seated</td><td></td><td></td></tr>
+        <tr><td class="checklist-cb">☐</td><td>16</td><td>HDMI connection is firm and fully seated at both ends</td><td></td><td></td></tr>
+        <tr><td class="checklist-cb">☐</td><td>17</td><td>All power connections are secure and undamaged</td><td></td><td></td></tr>
+        <tr><td class="checklist-cb">☐</td><td>18</td><td>All cables are routed and fastened safely</td><td></td><td></td></tr>
+        <tr><td class="checklist-cb">☐</td><td>19</td><td>No cables obstruct the operator's working area or movement</td><td></td><td></td></tr>
+        <tr><td class="checklist-cb">☐</td><td>20</td><td>The entire inspection station is physically stable and secure</td><td></td><td></td></tr>
+      </tbody>
+    </table>
+
+    <div class="section-sep"></div>
+
+    <div class="section-heading">
+      <span class="section-num">§ 10</span>
+      <span class="section-title">Final Functional Verification</span>
+    </div>
+    <p>Final functional verification is the responsibility of the <strong>project/software team</strong> and must be performed after the hardware setup team has completed and signed off the checklist above.</p>
+    <div class="test-box">
+      <div class="test-box-header pass">PASS Test — Known-Good Component</div>
+      <div class="test-box-body">
+        <div class="test-label">Input Condition</div>
+        <p>Place a known-good (non-defective) yoke component in the inspection fixture.</p>
+        <div class="test-label">Expected Result</div>
+        <ul>
+          <li>Component is correctly detected within the inspection frame.</li>
+          <li>Valid inspection regions are identified and displayed/highlighted.</li>
+          <li><strong>PASS</strong> result is shown on the display.</li>
+          <li>Buzzer does not activate.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="test-box">
+      <div class="test-box-header fail">FAIL Test — Known-Defective Component</div>
+      <div class="test-box-body">
+        <div class="test-label">Input Condition</div>
+        <p>Place a known-defective yoke component (with a known defect or missing region) in the inspection fixture.</p>
+        <div class="test-label">Expected Result</div>
+        <ul>
+          <li>Defective or missing region is correctly identified.</li>
+          <li>Defective region is highlighted on the inspection display.</li>
+          <li><strong>FAIL</strong> result is shown on the display.</li>
+          <li>Buzzer activates to alert the operator.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="text-muted" style="font-size:9.5pt;">Both test cases must produce the expected results before the system is accepted and handover sign-off is completed.</p>
+  </div>
+  <div class="page-footer">
+    <span>KLE Technological University, Hubballi — Department of Computer Science and Engineering</span>
+    <span>Page 7 of 10</span>
+  </div>
+</div>
+
+<!-- PAGE 8: Do-Not-Change + Maintenance -->
+<div class="page">
+  <div class="page-header">
+    <span>YOKECLASSIFIER — Hardware Setup &amp; Handover Document</span>
+    <span class="doc-id">YC-HW-HANDOVER-001 · Rev 1.0</span>
+  </div>
+  <div class="content">
+    <div class="section-heading">
+      <span class="section-num">§ 11</span>
+      <span class="section-title">Important Do-Not-Change Instructions</span>
+    </div>
+    <p>The following restrictions protect the validated inspection setup. Any deviation from the installed and verified configuration may invalidate inspection results and requires prior authorization from the project/software team.</p>
+    <div class="warning-box">
+      <div class="warn-title">⚠ Strictly Do Not Perform the Following</div>
+      <ul>
+        <li><strong>Move the camera</strong> after final setup and validation.</li>
+        <li><strong>Change the camera height</strong> without authorization.</li>
+        <li><strong>Change the camera angle</strong> without authorization.</li>
+        <li><strong>Move the LED ring light</strong> after validation.</li>
+        <li><strong>Modify fixture dimensions</strong> without consulting the project/software team.</li>
+        <li><strong>Replace the camera</strong> with a different model or type without verification.</li>
+        <li><strong>Disconnect hardware</strong> (camera, buzzer, display) while the system is operating.</li>
+        <li><strong>Modify the YokeClassifier software</strong> in any way.</li>
+        <li><strong>Replace, delete, or rename model files</strong> without authorization from the project/software team.</li>
+        <li><strong>Change system configuration settings</strong> without consulting the project/software team.</li>
+      </ul>
+    </div>
+    <div class="info-box">
+      The YokeClassifier system is calibrated to a specific camera geometry and lighting condition. Any uncoordinated physical change may require full re-validation of the inspection system from the beginning.
+    </div>
+
+    <div class="section-sep"></div>
+
+    <div class="section-heading">
+      <span class="section-num">§ 12</span>
+      <span class="section-title">Maintenance Guidelines</span>
+    </div>
+    <p>The following routine maintenance activities are recommended to keep the inspection station operating reliably. No specialized technical skills are required.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Maintenance Activity</th>
+          <th>Recommended Frequency</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>Clean the camera lens</td>
+          <td>Weekly or as required</td>
+          <td>Use a clean, dry microfiber cloth. Avoid solvents.</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Clean the LED ring light surface</td>
+          <td>Weekly or as required</td>
+          <td>Remove dust and oil deposits that may affect illumination uniformity.</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Check all cable connections</td>
+          <td>Monthly</td>
+          <td>Verify USB and HDMI connectors are fully seated and undamaged.</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Verify fixture mechanical stability</td>
+          <td>Monthly</td>
+          <td>Check that mounting fasteners are tight and the fixture has not shifted.</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Check camera position has not shifted</td>
+          <td>Monthly</td>
+          <td>Verify the camera mount joints are still locked and position is unchanged.</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Check lighting position has not shifted</td>
+          <td>Monthly</td>
+          <td>Verify ring light alignment relative to camera and fixture.</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>Ensure Mini PC ventilation is clear</td>
+          <td>Monthly</td>
+          <td>Remove dust accumulation near ventilation openings.</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td>Keep inspection area clean</td>
+          <td>Daily</td>
+          <td>Remove metal shavings, oil, and debris from fixture and surrounding area.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="text-muted" style="font-size:9pt;">If any hardware component fails or shows degradation, contact the project/software team before attempting replacement to ensure compatibility with the validated inspection setup.</p>
+  </div>
+  <div class="page-footer">
+    <span>KLE Technological University, Hubballi — Department of Computer Science and Engineering</span>
+    <span>Page 8 of 10</span>
+  </div>
+</div>
+
+<!-- PAGE 9: Responsibility Matrix + Handover Statement -->
+<div class="page">
+  <div class="page-header">
+    <span>YOKECLASSIFIER — Hardware Setup &amp; Handover Document</span>
+    <span class="doc-id">YC-HW-HANDOVER-001 · Rev 1.0</span>
+  </div>
+  <div class="content">
+    <div class="section-heading">
+      <span class="section-num">§ 13</span>
+      <span class="section-title">Handover Responsibility Matrix</span>
+    </div>
+    <p>The table below summarises the responsibility allocation for each handover activity.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Activity</th>
+          <th>Hardware Team</th>
+          <th>Project / Software Team</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Hardware procurement</td><td class="resp-responsible">Responsible</td><td class="resp-support">Support if required</td></tr>
+        <tr><td>2</td><td>Fixture installation</td><td class="resp-responsible">Responsible</td><td class="resp-verify">Verify</td></tr>
+        <tr><td>3</td><td>Camera mounting &amp; alignment</td><td class="resp-responsible">Responsible</td><td class="resp-verify">Final verification</td></tr>
+        <tr><td>4</td><td>Lighting installation</td><td class="resp-responsible">Responsible</td><td class="resp-verify">Final verification</td></tr>
+        <tr><td>5</td><td>Display installation</td><td class="resp-responsible">Responsible</td><td class="resp-verify">Verify</td></tr>
+        <tr><td>6</td><td>Buzzer installation</td><td class="resp-responsible">Responsible</td><td class="resp-verify">Verify</td></tr>
+        <tr><td>7</td><td>Cable and power setup</td><td class="resp-responsible">Responsible</td><td class="resp-verify">Verify</td></tr>
+        <tr><td>8</td><td>YokeClassifier software</td><td class="resp-not">Not responsible</td><td class="resp-responsible">Responsible</td></tr>
+        <tr><td>9</td><td>Model deployment &amp; configuration</td><td class="resp-not">Not responsible</td><td class="resp-responsible">Responsible</td></tr>
+        <tr><td>10</td><td>Final functional test</td><td class="resp-support">Support</td><td class="resp-responsible">Responsible</td></tr>
+        <tr><td>11</td><td>Final acceptance sign-off</td><td class="resp-joint">Joint</td><td class="resp-joint">Joint</td></tr>
+      </tbody>
+    </table>
+    <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:9pt;margin-top:6px;">
+      <span><strong class="resp-responsible">Responsible</strong> — Primary owner</span>
+      <span><strong class="resp-verify">Verify</strong> — Reviews and confirms result</span>
+      <span><strong class="resp-support">Support</strong> — Assists on request</span>
+      <span><strong class="resp-not">Not responsible</strong> — No role</span>
+      <span><strong class="resp-joint">Joint</strong> — Both teams participate</span>
+    </div>
+
+    <div class="section-sep"></div>
+
+    <div class="section-heading">
+      <span class="section-num">§ 14</span>
+      <span class="section-title">Final Handover Statement</span>
+    </div>
+    <div class="handover-statement">
+      The hardware setup team confirms that the required hardware components have been procured,
+      installed, connected, and physically verified in accordance with this document.
+      The project/software team will perform the final functional verification of the completed
+      YokeClassifier inspection system on the installed hardware.
+    </div>
+    <p style="margin-top:12px;font-size:10pt;color:var(--text-sec);text-align:center;">
+      This statement is confirmed by the signatures of all responsible parties on the Handover Sign-Off page.
+    </p>
+  </div>
+  <div class="page-footer">
+    <span>KLE Technological University, Hubballi — Department of Computer Science and Engineering</span>
+    <span>Page 9 of 10</span>
+  </div>
+</div>
+
+<!-- PAGE 10: Sign-Off -->
+<div class="page">
+  <div class="page-header">
+    <span>YOKECLASSIFIER — Hardware Setup &amp; Handover Document</span>
+    <span class="doc-id">YC-HW-HANDOVER-001 · Rev 1.0</span>
+  </div>
+  <div class="content" style="padding-top:24px;">
+    <div class="section-heading">
+      <span class="section-num">§ 15</span>
+      <span class="section-title">Handover Sign-Off</span>
+    </div>
+    <p>All parties must sign this section to confirm completion of their respective responsibilities. The system is considered formally handed over upon receipt of all signatures.</p>
+
+    <div class="signoff-grid">
+      <div class="signoff-card">
+        <div class="card-title">Hardware Setup Team</div>
+        <div class="signoff-field"><div class="signoff-label">Full Name</div><div class="signoff-line"></div></div>
+        <div class="signoff-field"><div class="signoff-label">Designation / Role</div><div class="signoff-line"></div></div>
+        <div class="signoff-field"><div class="signoff-label">Signature</div><div class="signoff-line" style="height:36px;"></div></div>
+        <div class="signoff-field"><div class="signoff-label">Date</div><div class="signoff-line"></div></div>
+        <div class="signoff-field" style="margin-bottom:0;"><div class="signoff-label">Seal (if applicable)</div><div class="signoff-line" style="height:36px;"></div></div>
+      </div>
+      <div class="signoff-card">
+        <div class="card-title">Project / Software Team</div>
+        <div class="signoff-field"><div class="signoff-label">Full Name</div><div class="signoff-line"></div></div>
+        <div class="signoff-field"><div class="signoff-label">Designation / Role</div><div class="signoff-line"></div></div>
+        <div class="signoff-field"><div class="signoff-label">Signature</div><div class="signoff-line" style="height:36px;"></div></div>
+        <div class="signoff-field"><div class="signoff-label">Date</div><div class="signoff-line"></div></div>
+        <div class="signoff-field" style="margin-bottom:0;"><div class="signoff-label">Seal (if applicable)</div><div class="signoff-line" style="height:36px;"></div></div>
+      </div>
+    </div>
+
+    <div class="signoff-grid" style="margin-top:16px;">
+      <div class="signoff-card">
+        <div class="card-title">Project Guide / Supervisor</div>
+        <div class="signoff-field"><div class="signoff-label">Full Name</div><div class="signoff-line"></div></div>
+        <div class="signoff-field"><div class="signoff-label">Designation</div><div class="signoff-line"></div></div>
+        <div class="signoff-field"><div class="signoff-label">Signature</div><div class="signoff-line" style="height:36px;"></div></div>
+        <div class="signoff-field"><div class="signoff-label">Date</div><div class="signoff-line"></div></div>
+        <div class="signoff-field" style="margin-bottom:0;"><div class="signoff-label">Seal (if applicable)</div><div class="signoff-line" style="height:36px;"></div></div>
+      </div>
+      <div class="signoff-card" style="border-top-color:var(--accent);">
+        <div class="card-title" style="color:var(--accent);border-bottom-color:var(--accent);">Final Acceptance</div>
+        <div class="signoff-field"><div class="signoff-label">Full Name</div><div class="signoff-line"></div></div>
+        <div class="signoff-field"><div class="signoff-label">Designation / Authority</div><div class="signoff-line"></div></div>
+        <div class="signoff-field"><div class="signoff-label">Signature</div><div class="signoff-line" style="height:36px;"></div></div>
+        <div class="signoff-field"><div class="signoff-label">Date</div><div class="signoff-line"></div></div>
+        <div class="signoff-field" style="margin-bottom:0;"><div class="signoff-label">Seal (if applicable)</div><div class="signoff-line" style="height:36px;"></div></div>
+      </div>
+    </div>
+
+    <!-- Document control block -->
+    <div style="margin-top:28px;border-top:2px solid var(--navy);padding-top:14px;">
+      <table style="font-size:8.5pt;margin:0;color:var(--text-sec);">
+        <thead>
+          <tr>
+            <th style="background:var(--bg-alt);color:var(--navy);padding:5px 10px;border:1px solid var(--border);width:35%;">Document Title</th>
+            <th style="background:var(--bg-alt);color:var(--navy);padding:5px 10px;border:1px solid var(--border);width:25%;">Reference</th>
+            <th style="background:var(--bg-alt);color:var(--navy);padding:5px 10px;border:1px solid var(--border);width:20%;">Revision</th>
+            <th style="background:var(--bg-alt);color:var(--navy);padding:5px 10px;border:1px solid var(--border);width:20%;">Total Pages</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:5px 10px;border:1px solid var(--border);">YokeClassifier Hardware Setup &amp; Handover Document</td>
+            <td style="padding:5px 10px;border:1px solid var(--border);font-family:var(--mono);">YC-HW-HANDOVER-001</td>
+            <td style="padding:5px 10px;border:1px solid var(--border);">1.0 — Initial Release</td>
+            <td style="padding:5px 10px;border:1px solid var(--border);text-align:center;">10</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:8pt;color:var(--text-sec);margin-top:8px;text-align:center;">
+        Prepared by Abhinandan N M · Computer Science and Engineering · KLE Technological University, Hubballi<br/>
+        This document is intended for distribution to the hardware installation team and project supervisors only.
+      </p>
+    </div>
+  </div>
+  <div class="page-footer">
+    <span>KLE Technological University, Hubballi — Department of Computer Science and Engineering</span>
+    <span>Page 10 of 10</span>
+  </div>
+</div>
+
+</body>
+</html>
