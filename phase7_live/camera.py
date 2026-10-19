@@ -22,15 +22,39 @@ class Camera:
             self.cap = cv2.VideoCapture(index)
             self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.cfg.get("width", 1920))
             self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.cfg.get("height", 1080))
+            # Disable autofocus on all webcams / USB industrial cameras
+            try:
+                self.cap.set(cv2.CAP_PROP_AUTOFOCUS, 0)
+            except Exception:
+                pass
             if not self.cap.isOpened():
                 raise RuntimeError("Could not open webcam at index {}".format(index))
             self._start_thread()
                 
         elif self.type == "ip_camera":
             url = self.cfg.get("url", "")
-            self.cap = cv2.VideoCapture(url)
+            import os
+            # Set TCP transport for RTSP streams to eliminate packet drops/jitter
+            if "rtsp://" in url.lower():
+                os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;tcp"
+            
+            # Use CAP_FFMPEG for network streams if supported
+            self.cap = cv2.VideoCapture(url, cv2.CAP_FFMPEG) if hasattr(cv2, 'CAP_FFMPEG') else cv2.VideoCapture(url)
             if not self.cap.isOpened():
-                raise RuntimeError("Could not open IP camera at {}".format(url))
+                # Fallback to standard open
+                self.cap = cv2.VideoCapture(url)
+                if not self.cap.isOpened():
+                    raise RuntimeError("Could not open IP camera at {}".format(url))
+            
+            # Disable autofocus across all IP cameras / phone webcams
+            try:
+                self.cap.set(cv2.CAP_PROP_AUTOFOCUS, 0)
+            except Exception:
+                pass
+            # Apply the requested resolution so RTSP decoder matches config.
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH,  self.cfg.get("width",  2048))
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.cfg.get("height", 1536))
+
             self._start_thread()
                 
         elif self.type == "simulation":
@@ -56,7 +80,20 @@ class Camera:
         while True:
             if self.stopped:
                 return
-            self.ret, self.frame = self.cap.read()
+            ret, frame = self.cap.read()
+            if ret:
+                self.ret = True
+                self.frame = frame
+            else:
+                self.ret = False
+                if self.type == "ip_camera":
+                    time.sleep(1.0)
+                    url = self.cfg.get("url", "")
+                    try:
+                        self.cap.release()
+                        self.cap = cv2.VideoCapture(url)
+                    except:
+                        pass
 
     def read(self):
         """Returns (success, frame_bgr)"""
@@ -73,6 +110,19 @@ class Camera:
             # Simulate framerate
             time.sleep(1.0 / self.cfg.get("fps", 30))
             return (frame is not None, frame)
+
+    def read_roi(self, crop_frac: float = 0.80):
+        """Returns (success, frame_bgr) cropped to the central crop_frac
+        of the full frame. Discards distracting edge regions caused by
+        the BCS30HDIR50's wide-angle IR lens."""
+        ret, frame = self.read()
+        if not ret or frame is None:
+            return ret, frame
+        h, w = frame.shape[:2]
+        margin_x = int(w * (1.0 - crop_frac) / 2)
+        margin_y = int(h * (1.0 - crop_frac) / 2)
+        cropped = frame[margin_y:h - margin_y, margin_x:w - margin_x]
+        return True, cropped
 
     def release(self):
         if self.type in ("webcam", "ip_camera"):

@@ -14,3 +14,7 @@ Thumbs.db
 # Log files and local test outputs
 *.log
 debug_out.txt
+*.jpg
+*.png
+outputs/reports/
+outputs/shift_logs/

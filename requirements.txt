@@ -12,3 +12,4 @@ tqdm
 pyyaml
 seaborn
 pandas
+openpyxl

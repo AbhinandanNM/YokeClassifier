@@ -129,5 +129,16 @@ class Inspector:
             }
             
         result["status"] = "PASS" if all_present else "FAIL"
+
+        # Compute a fast visual fingerprint (aHash) of the aligned yoke
+        # This allows distinguishing whether a placed part is the exact same piece or a new piece
+        try:
+            small_gray = cv2.cvtColor(cv2.resize(aligned, (16, 16)), cv2.COLOR_BGR2GRAY)
+            avg = small_gray.mean()
+            # 256-bit boolean vector
+            hash_bits = (small_gray > avg).flatten()
+            result["fingerprint"] = hash_bits
+        except Exception:
+            result["fingerprint"] = None
         
         return result
