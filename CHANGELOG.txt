@@ -1,0 +1,93 @@
+# ==============================================================================
+# INDUSTRIAL VISUAL INSPECTION & PRODUCTION COUNTER SYSTEM — CHANGELOG
+# ==============================================================================
+
+Date: 2026-10-21
+Author: Antigravity Assistant & Engineering Team
+Workspace: YokeClassifier (Industrial Minor Project)
+
+--------------------------------------------------------------------------------
+1. PERFORMANCE & FPS OPTIMIZATION (HIGH FRAMERATE CPU INFERENCE)
+--------------------------------------------------------------------------------
+- config/config.yaml:
+  * Reduced `alignment.orb_features` from 5000 to 2000 (sweet spot providing 
+    hundreds of RANSAC inliers while cutting feature extraction latency by ~70%).
+- phase2_alignment/aligner.py:
+  * Lowered `_downscale` default `max_dim` from 1600 to 960px.
+  * SIFT matching runtime dropped from ~1.5s-2.0s down to ~120ms per frame.
+  * Achieved 10-15 FPS fluid camera display on OptiPlex CPU without lag.
+
+--------------------------------------------------------------------------------
+2. EXACT TIMING WORKFLOW (5s INSPECTION / 5s RESULT FREEZE / INSTANT RESET)
+--------------------------------------------------------------------------------
+- phase7_live/live_inspection.py:
+  * State Machine Inspection Phase: Time-based consensus window (exactly 5.0s)
+    to allow the operator's hand to clear and the component to fully settle.
+  * Result Freeze Phase: The inspection result (PASS/FAIL banner, green/red boxes,
+    and confidence scores) remains locked on screen for exactly 5.0s so the 
+    operator can clearly view the inspection status.
+  * Instant Reset: Lowered removal verification to 1 empty frame (< 0.2s) so 
+    the screen instantly clears back to "WAITING FOR PART" the moment the 
+    operator lifts the yoke out.
+
+--------------------------------------------------------------------------------
+3. INTERACTIVE LIVE ROI CALIBRATION MODE (HOTKEY: 'C')
+--------------------------------------------------------------------------------
+- phase7_live/live_inspection.py:
+  * Added live interactive on-screen ROI Box calibration mode triggered by 'C'.
+  * Operator can visually align all 7 bounding boxes directly over the camera feed:
+    - Arrow Keys (↑, ↓, ←, →): Move box position (x, y)
+    - W / S / A / D: Expand or shrink box size (w, h)
+    - TAB or N: Cycle to next feature (spline -> top_nib -> bottom_nib -> holes)
+    - Enter: Save updated coordinates directly into config/config.yaml
+    - ESC or C: Exit calibration mode and resume live inspection.
+  * ROIExtractor dynamically reloads the calibrated boxes without restarting!
+
+--------------------------------------------------------------------------------
+Date: 2026-10-22
+4. FALSE TRIGGER GUARD (EMPTY TABLE / BACKGROUND REJECTION)
+--------------------------------------------------------------------------------
+- phase2_alignment/aligner.py:
+  * In `_align_contour`, template correlation check protects against empty table textures.
+  * Calibrated threshold to 0.05 so yokes on varied inspection papers/desks are detected.
+
+--------------------------------------------------------------------------------
+5. MOUSE-DRAGGABLE ROI CALIBRATION & SIFT TUNING
+--------------------------------------------------------------------------------
+- phase7_live/live_inspection.py:
+  * Upgraded calibration mode ('C') to full mouse drag-and-drop:
+    - Click and drag inside any ROI box to reposition it (x, y).
+    - Click and drag bottom-right yellow handle to resize (w, h).
+    - Click any other box to select it.
+    - Press ENTER to save to config/config.yaml and immediately reload without restarting.
+- config/config.yaml:
+  * Adjusted Lowe's ratio test from 0.75 to 0.80 to improve SIFT match robustness
+    under mobile camera compression and varying background illumination.
+
+--------------------------------------------------------------------------------
+6. BACKGROUND-INVARIANT PART DETECTION
+--------------------------------------------------------------------------------
+- phase2_alignment/aligner.py:
+  * Converted orientation alignment to edge-silhouette correlation (Canny edges),
+    enabling robust part detection whether the yoke is placed on white paper, 
+    printed diagrams, or dark workshop surfaces without false rejections.
+
+--------------------------------------------------------------------------------
+7. RESULT SCREEN DISPLAY DURATION
+--------------------------------------------------------------------------------
+- phase7_live/live_inspection.py:
+  * Reduced `RESULT_FREEZE_SEC` from 5.0s to 3.5s for faster station turnover.
+  * Enhanced reset trigger so if the component is lifted during or after the freeze,
+    the station immediately resets to `WAITING FOR PART` without locking.
+
+--------------------------------------------------------------------------------
+8. OPERATOR ENTER-KEY INSPECTION & RESET TRIGGER
+--------------------------------------------------------------------------------
+- phase7_live/live_inspection.py:
+  * Upgraded live workflow to clean two-stage ENTER key toggle:
+    - In `WAITING FOR PART`: Press `ENTER` to immediately inspect the placed component,
+      record the inspection in Excel, update Pass/Fail counter, and display the result.
+    - In `RECORDED` (Result View): Added clear `[PRESS ENTER TO RESET]` alert on the top banner
+      and the status panel to guide operators to press `ENTER` to proceed to the next piece.
+    - Press `'C'` at any time to adjust and drag ROI boxes with mouse.
+

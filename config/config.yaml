@@ -9,8 +9,8 @@ paths:
   reference_image: C:/Users/Abhinandan/OneDrive/Desktop/Minor/perfect/Coated-perfect_20260715_210802.jpg
 alignment:
   method: sift
-  orb_features: 5000
-  match_ratio: 0.75
+  orb_features: 2000
+  match_ratio: 0.8
   min_good_matches: 10
   max_reproj_error_align: 12.0
   output_size:
@@ -18,40 +18,40 @@ alignment:
   - 1080
 roi:
   spline:
-  - 376
-  - 373
-  - 432
-  - 302
+  - 409
+  - 400
+  - 336
+  - 301
   top_nib:
-  - 444
-  - 95
-  - 252
-  - 249
+  - 452
+  - 169
+  - 222
+  - 203
   bottom_nib:
-  - 429
-  - 702
-  - 292
-  - 270
-  hole_tl:
-  - 71
-  - 63
-  - 314
-  - 261
-  hole_tr:
-  - 742
-  - 64
-  - 303
-  - 265
-  hole_bl:
-  - 60
-  - 720
-  - 322
-  - 259
-  hole_br:
-  - 754
+  - 440
   - 714
-  - 299
-  - 268
+  - 239
+  - 186
+  hole_tl:
+  - 264
+  - 182
+  - 227
+  - 180
+  hole_tr:
+  - 626
+  - 183
+  - 223
+  - 202
+  hole_bl:
+  - 251
+  - 725
+  - 228
+  - 183
+  hole_br:
+  - 616
+  - 724
+  - 231
+  - 197
   crop_size: 128
 synthetic:
   inpaint_radius: 12
@@ -104,7 +104,7 @@ visualisation:
   panel_width: 400
 camera:
   type: ip_camera
-  url: http://10.173.60.64:8080/video
+  url: http://10.140.2.103:8080/video
   index: 0
   width: 1280
   height: 720

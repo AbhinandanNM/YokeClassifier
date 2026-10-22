@@ -180,7 +180,7 @@ class Aligner:
     # ------------------------------------------------------------------ #
     # Pre-processing helpers
     # ------------------------------------------------------------------ #
-    def _downscale(self, img: np.ndarray, max_dim: int = 1600) -> np.ndarray:
+    def _downscale(self, img: np.ndarray, max_dim: int = 960) -> np.ndarray:
         """Downscale images so the longest edge ≤ max_dim for fast matching."""
         h, w = img.shape[:2]
         if max(h, w) > max_dim:
@@ -403,18 +403,20 @@ class Aligner:
         best_corr = -1.0
         best_angle = delta_angle
         h_ref, w_ref = self.ref_bgr.shape[:2]
-        ref_gray_small = cv2.resize(cv2.cvtColor(self.ref_bgr, cv2.COLOR_BGR2GRAY), (128, 128))
+        # Use edge correlation to select best 180-deg orientation (invariant to white paper vs black background)
+        ref_edge_small = cv2.Canny(cv2.resize(cv2.cvtColor(self.ref_bgr, cv2.COLOR_BGR2GRAY), (128, 128)), 50, 150)
         for test_angle in (delta_angle, delta_angle + 180.0):
             M_test = cv2.getRotationMatrix2D((sx, sy), test_angle, scale)
             M_test[0, 2] += rx - sx
             M_test[1, 2] += ry - sy
             warped_test = cv2.warpAffine(bgr, M_test, (w_ref, h_ref), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
-            test_gray_small = cv2.resize(cv2.cvtColor(warped_test, cv2.COLOR_BGR2GRAY), (128, 128))
-            corr = float(cv2.matchTemplate(test_gray_small, ref_gray_small, cv2.TM_CCOEFF_NORMED)[0][0])
+            test_edge_small = cv2.Canny(cv2.resize(cv2.cvtColor(warped_test, cv2.COLOR_BGR2GRAY), (128, 128)), 50, 150)
+            corr = float(cv2.matchTemplate(test_edge_small, ref_edge_small, cv2.TM_CCOEFF_NORMED)[0][0])
             if corr > best_corr:
                 best_corr = corr
                 best_M = M_test
                 best_angle = test_angle
+
         quality["rotation_applied"] = int(round(best_angle)) % 360
         warped  = cv2.warpAffine(bgr, best_M, (w_ref, h_ref),
                                  flags=cv2.INTER_LINEAR,
